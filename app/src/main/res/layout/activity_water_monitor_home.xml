@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:id="@+id/cL"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".WaterMonitor.WaterMonitorHomeActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_water_bg"
+            android:layout_marginTop="20dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Water Routine"
+            android:textStyle="bold"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/font_30"
+            android:layout_marginTop="30dp"
+            android:fontFamily="cursive"
+            android:gravity="center_horizontal"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/water_monitor_desc"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/colorTextLight"
+            android:textSize="@dimen/font_14"
+            android:gravity="center_horizontal"/>
+
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/bAddRoutine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:backgroundTint="@color/green"
+            android:text="ADD NEW ROUTINE"
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_14" />
+
+
+
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

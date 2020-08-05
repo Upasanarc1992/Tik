@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/container"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".WaterMonitor.WaterMonitorHomeActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose Interval"
+        android:layout_margin="20dp"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/font_24"
+        android:fontFamily="cursive"
+        android:gravity="center"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvIntervals"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"/>
+
+    <LinearLayout
+        android:id="@+id/llTiming"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="120dp"
+            android:layout_height="1dp"
+            android:background="@color/colorText"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"/>
+
+        <com.joahquin.app.tik.Utils.CustomViews.LabelView
+            android:id="@+id/lvStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:label=" Start At  "
+            app:showLabel="true"
+            app:labelType="left"
+            app:showIcon="true"
+            app:iconType="smallLeft"
+            app:inputType="dateTime"
+            app:lablIcon="@mipmap/ic_morning"
+            app:inernalPadding="3dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            />
+
+        <com.joahquin.app.tik.Utils.CustomViews.LabelView
+            android:id="@+id/lvEnd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:label="Show Till"
+            app:showLabel="true"
+            app:labelType="left"
+            app:showIcon="true"
+            app:iconType="smallLeft"
+            app:inputType="dateTime"
+            app:lablIcon="@mipmap/ic_night"
+            app:inernalPadding="3dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="5dp"
+            />
+
+        <Button
+            android:id="@+id/bPreviewRoutine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:backgroundTint="@color/blue"
+            android:text="PREVIEW ROUTINE"
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_14"
+            android:layout_margin="10dp"/>
+
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

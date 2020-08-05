@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">tik</string>
+
+<!--    Water Monitor-->
+    <string name="water_monitor_desc">Monitor your daily water intake along with a reminder set according to your preference. We reminds you to drink enough water. Proper hydration keeps your skin healthy and helps you lose weight.</string>
+</resources>

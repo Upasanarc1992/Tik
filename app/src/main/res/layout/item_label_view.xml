@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center_vertical">
+
+    <LinearLayout
+        android:id="@+id/llContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/d_edittext_bg">
+
+        <LinearLayout
+            android:id="@+id/llLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp">
+
+            <ImageView
+                android:id="@+id/ivIcon"
+                android:layout_width="25dp"
+                android:layout_height="25dp"/>
+
+            <TextView
+                android:id="@+id/tvLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:paddingLeft="5dp"
+                android:text="New"
+                android:layout_alignParentEnd="true"
+                android:textColor="@color/colorText"
+                android:textSize="12sp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+
+        <View
+            android:id="@+id/vDivider"
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorText"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/tvTopLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="right"
+                android:text="NEW"
+                android:textColor="@color/colorText"
+                android:textSize="10sp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="2dp"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/llText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvPrefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:layout_centerVertical="true"
+                    android:text="NEW"
+                    android:paddingRight="5dp"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@color/colorText"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+
+                <AutoCompleteTextView
+                    android:id="@+id/atvText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/transparent"
+                    android:textColorHint="@color/colorText"
+                    android:hint="Branch Name"
+                    android:textSize="14sp"
+                    android:minEms="4"
+                    android:layout_weight="1"
+                    android:gravity="right|center_vertical"
+                    android:padding="0dp"/>
+
+                <TextView
+                    android:id="@+id/tvSuffix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:layout_centerVertical="true"
+                    android:paddingLeft="10dp"
+                    android:text="NEW"
+                    android:paddingRight="5dp"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@color/colorText"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+
+
+            </LinearLayout>
+
+
+
+            <com.joahquin.app.tik.Utils.CustomViews.DateTimeEditText
+                android:id="@+id/dtText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                app:dateFormat="hh:mm a"
+                app:mode="timePick"
+                android:textColor="@color/colorText"
+                android:textSize="@dimen/font_16"
+                android:visibility="gone"
+                android:layout_marginLeft="5dp"/>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:text="NEW"
+        android:textColor="@color/red"
+        android:textSize="10sp"
+        android:visibility="gone" />
+
+</LinearLayout>

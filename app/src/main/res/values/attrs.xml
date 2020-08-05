@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="DateTimeEditText">
+        <attr name="mode">
+            <enum name="datePick" value="0"/>
+            <enum name="timePick" value="1"/>
+            <enum name="dateTimePick" value="2"/>
+        </attr>
+        <attr name="dateFormat" format="string"/>
+        <attr name="timeFormat" format="string"/>
+        <attr name="date" format="string"/>
+        <attr name="maxDate" format="string"/>
+        <attr name="minDate" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="labelView">
+        <attr name="allowAdapter" format="boolean" />
+        <attr name="lablIcon" format="reference" />
+        <attr name="showIcon" format="boolean" />
+        <attr name="iconTint" format="color" />
+        <attr name="labelColor" format="color" />
+        <attr name="iconType">
+            <enum name="small" value="0"/>
+            <enum name="normal" value="1"/>
+            <enum name="smallLeft" value="2"/>
+        </attr>
+        <attr name="showLabel" format="boolean" />
+        <attr name="labelType">
+            <enum name="top" value="0"/>
+            <enum name="left" value="1"/>
+        </attr>
+        <attr name="label" format="string" />
+        <attr name="hintText" format="string" />
+        <attr name="size" format="dimension" />
+        <attr name="minLines" format="integer" />
+        <attr name="allowEdit" format="boolean" />
+        <attr name="hideBorder" format="boolean" />
+        <attr name="inernalPadding" format="dimension" />
+        <attr name="textGravity">
+            <enum name="left" value="3"/>
+            <enum name="right" value="5"/>
+            <enum name="center" value="17"/>
+        </attr>
+        <attr name="inputType">
+            <enum name="text" value="0"/>
+            <enum name="number" value="1"/>
+            <enum name="decimal" value="2"/>
+            <enum name="dateTime" value="3"/>
+        </attr>
+    </declare-styleable>
+
+</resources>
