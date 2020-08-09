@@ -11,8 +11,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     private static final String DATABASE_NAME = "tik.db";
-    // Table Names
+    // Table Names //
     private static final String TABLE_1 = "user";
+    private static final String TABLE_2 = "Assignment";
+    private static final String TABLE_3 = "Tasks";
+    private static final String TABLE_4 = "Steps";
+    private static final String TABLE_5 = "Schedule";
 
     public static DatabaseHandler mInstance;
     SQLiteDatabase dbWritable, dbReadable;
@@ -48,6 +52,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         // creating required tables
         sqLiteDatabase.execSQL(CREATE_TABLE_USER);
+        sqLiteDatabase.execSQL(CREATE_TABLE_ASSIGNMENTS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_TASKS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_STEPS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_SCHEDULE);
     }
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
@@ -81,5 +89,44 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "type" + " TEXT," +
             "com_name" + " TEXT," +
             "logo" + " TEXT" + ")";
+
+    // Assignment table create statement
+    private static final String CREATE_TABLE_ASSIGNMENTS = "CREATE TABLE " + TABLE_2 +
+            "(" + "id" + " INTEGER," +
+            "type" + " INTEGER," +
+            "description" + " TEXT," +
+            "isReccursive" + " INTEGER," +
+            "interval" + " INTEGER," +
+            "createdOn" + " TEXT," +
+            "lastPass" + " TEXT" +
+            ")";
+
+    // Task table create statement
+    private static final String CREATE_TABLE_TASKS = "CREATE TABLE " + TABLE_3 +
+            "(" + "id" + " INTEGER," +
+            "assignment_id" + " INTEGER," +
+            "scheduleDateTime" + " TEXT," +
+            "isPending" + " INTEGER," +
+            "isActive" + " INTEGER" +
+            ")";
+
+    // Steps table create statement
+    private static final String CREATE_TABLE_STEPS = "CREATE TABLE " + TABLE_4 +
+            "(" + "id" + " INTEGER," +
+            "task_id" + " INTEGER," +
+            "info" + " TEXT," +
+            "interval" + " INTEGER," +
+            "actionToTake" + " INTEGER," +
+            "isPending" + " INTEGER" +
+            ")";
+
+    // Schedule table create statement
+    private static final String CREATE_TABLE_SCHEDULE = "CREATE TABLE " + TABLE_5 +
+            "(" + "id" + " INTEGER," +
+            "task_id" + " INTEGER," +
+            "step_id" + " INTEGER," +
+            "alarmInfo" + " TEXT," +
+            "isuccess" + " INTEGER" +
+            ")";
 
 }
