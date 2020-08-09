@@ -3,16 +3,21 @@ package com.joahquin.app.tik.WaterMonitor;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +27,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
@@ -53,7 +59,9 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
     Date endTime;
 
     double selectedInterval;
+    ArrayList<Date> timeIntervalList;
 
+    public static final String TAG = "WaterMonitorHome";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,6 +150,7 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
                 endTime = dtEnd.getDate();
 
                 intervalDialog.dismiss();
+                getDateWithIntervals();
                 previewIntervalSelectedDialog();
             }
         });
@@ -160,6 +169,20 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
         previewDialog.getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorBackground));
         previewDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
+
+        RecyclerView rvPreview = previewDialog.findViewById(R.id.rvPreview);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        rvPreview.setLayoutManager(layoutManager);
+        timeIntervalList = getDateWithIntervals();
+        WaterMonitorIntervalAdapter waterMonitorIntervalAdapter = new WaterMonitorIntervalAdapter(
+                context, timeIntervalList, "hh:mm a", new NotifyInterface() {
+            @Override
+            public void notify(int pos) {
+
+            }
+        });
+        rvPreview.setAdapter(waterMonitorIntervalAdapter);
 
 
         previewDialog.show();
@@ -180,5 +203,22 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
         return intervals;
     }
 
+    public ArrayList<Date> getDateWithIntervals(){
+        ArrayList<Date> dateList = new ArrayList<>();
+
+        Date tmpTime = startTime;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(tmpTime);
+
+        while(tmpTime.before(endTime))
+        {
+            cal.add(Calendar.MINUTE,(int)(selectedInterval*60));
+            tmpTime = cal.getTime();
+            dateList.add(tmpTime);
+        }
+
+        Log.d(TAG, "getDateWithIntervals: "+ dateList.toString());
+        return dateList;
+    }
 
 }
