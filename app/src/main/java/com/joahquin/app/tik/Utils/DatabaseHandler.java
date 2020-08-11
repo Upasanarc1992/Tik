@@ -1,8 +1,19 @@
 package com.joahquin.app.tik.Utils;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import com.joahquin.app.tik.Items.AssignmentItem;
+import com.joahquin.app.tik.Items.StepItem;
+import com.joahquin.app.tik.Items.TaskItem;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -83,36 +94,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "authtoken" + " TEXT," +
             "name" + " TEXT," +
             "mobile" + " TEXT," +
-            "email" + " TEXT," +
-            "role" + " TEXT," +
-            "company" + " INTEGER," +
-            "type" + " TEXT," +
-            "com_name" + " TEXT," +
-            "logo" + " TEXT" + ")";
+            "email" + " TEXT" +
+            ")";
 
     // Assignment table create statement
     private static final String CREATE_TABLE_ASSIGNMENTS = "CREATE TABLE " + TABLE_2 +
-            "(" + "id" + " INTEGER," +
+            "(" + "id" + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             "type" + " INTEGER," +
             "description" + " TEXT," +
             "isReccursive" + " INTEGER," +
-            "interval" + " INTEGER," +
+            "interval" + " TEXT," +
             "createdOn" + " TEXT," +
-            "lastPass" + " TEXT" +
+            "lastPass" + " TEXT" + // Date with 00:00 time
             ")";
 
     // Task table create statement
     private static final String CREATE_TABLE_TASKS = "CREATE TABLE " + TABLE_3 +
-            "(" + "id" + " INTEGER," +
+            "(" + "id" + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             "assignment_id" + " INTEGER," +
             "scheduleDateTime" + " TEXT," +
+            "interval" + " TEXT," + // Time gap from lastPass date
             "isPending" + " INTEGER," +
             "isActive" + " INTEGER" +
             ")";
 
     // Steps table create statement
     private static final String CREATE_TABLE_STEPS = "CREATE TABLE " + TABLE_4 +
-            "(" + "id" + " INTEGER," +
+            "(" + "id" + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             "task_id" + " INTEGER," +
             "info" + " TEXT," +
             "interval" + " INTEGER," +
@@ -122,11 +130,364 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Schedule table create statement
     private static final String CREATE_TABLE_SCHEDULE = "CREATE TABLE " + TABLE_5 +
-            "(" + "id" + " INTEGER," +
+            "(" + "id" + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             "task_id" + " INTEGER," +
             "step_id" + " INTEGER," +
             "alarmInfo" + " TEXT," +
+            "alarmStepInfo" + " TEXT," +
+            "alarmTimeStamp" + " TEXT," +
             "isuccess" + " INTEGER" +
             ")";
+
+    // ============ Insert Methods =================================================================
+
+    public void replaceAssignment(AssignmentItem assignment){
+        SQLiteDatabase db = getWritable();
+        db.delete(TABLE_2, "type" + "=" + assignment.getType(), null);
+
+        ContentValues values = new ContentValues();
+        values.put("type", assignment.getType());
+        values.put("description", assignment.getDescription());
+        values.put("isReccursive", assignment.isReccursive() ? 1 : 0);
+        values.put("interval", assignment.getInterval());
+        values.put("createdOn"," DATETIME('NOW')");
+
+        db.insert(TABLE_2, null, values);
+
+        replaceTask(assignment.getId(), assignment.getTaskList());
+    }
+
+    public void updateAssignment(AssignmentItem assignment){
+        SQLiteDatabase db = getWritable();
+        String where = " id = '"+assignment.getId()+"'";
+
+        ContentValues values = new ContentValues();
+        values.put("lastPass", assignment.getLastPass());
+        db.update(TABLE_2, values, where, null);
+
+        initializeAssignment(assignment.getId());
+    }
+
+    public void initializeAssignment(int assignmentId){
+        SQLiteDatabase db = getWritable();
+        ArrayList<TaskItem> taskList = getTaskList(assignmentId);
+
+        for(TaskItem tI : taskList){
+            markTask(tI.getId(), false);
+            if(BasicUtils.validateList(tI.getStepList()))
+            {
+                for(StepItem sI : tI.getStepList())
+                    markStep(sI.getId(), false);
+            }
+
+        }
+    }
+
+
+
+    public void replaceTask(int assignmentId, ArrayList<TaskItem> taskList){
+        SQLiteDatabase db = getReadable();
+        db.delete(TABLE_3, "assignment_id" + "=" + assignmentId, null);
+
+        for(TaskItem tI: taskList) {
+            ContentValues values = new ContentValues();
+            values.put("assignment_id", assignmentId);
+            values.put("scheduleDateTime", tI.getScheduleDateTime());
+            values.put("isPending", 0);
+            values.put("isActive", tI.isActive() ? 1 : 0);
+            values.put("interval", String.valueOf(tI.getTimeInterval()));
+
+            db.insert(TABLE_3, null, values);
+            replaceSteps(tI.getId(), tI.getStepList());
+        }
+    }
+
+    public void replaceSteps(int taskId, ArrayList<StepItem> stepsList){
+        SQLiteDatabase db = getReadable();
+        if(stepsList != null && stepsList.size()>0) {
+            db.delete(TABLE_4, "task_id" + "=" + taskId, null);
+
+            for (StepItem sI : stepsList) {
+                ContentValues values = new ContentValues();
+                values.put("task_id", taskId);
+                values.put("info", sI.getInfo());
+                values.put("interval", sI.getInterval());
+                values.put("actionToTake", sI.getActionToTake());
+                values.put("isPending", 0);
+
+                db.insert(TABLE_4, null, values);
+            }
+        }
+    }
+
+
+    public void addScheuledTasks(AssignmentItem assignmnentItem){
+        SQLiteDatabase db = getReadable();
+
+        Calendar cal = BasicUtils.convertStringToCal(assignmnentItem.getLastPass());
+
+        for(TaskItem tI : assignmnentItem.getTaskList()){
+            if(BasicUtils.validateList(tI.getStepList())) {
+                for (StepItem sI : tI.getStepList()) {
+                    ContentValues values = new ContentValues();
+                    values.put("task_id", tI.getId());
+                    values.put("step_id", sI.getId());
+                    values.put("alarmInfo", assignmnentItem.getDescription());
+                    values.put("alarmStepInfo", sI.getInfo());
+
+                    Date alarmDate = new Date(cal.getTimeInMillis()+tI.getTimeInterval()+sI.getInterval());
+                    values.put("alarmTimeStamp", BasicUtils.convertDateToString(alarmDate));
+                    values.put("isuccess",0);
+
+                    db.insert(TABLE_5, null, values);
+                }
+            }
+            else{
+                ContentValues values = new ContentValues();
+                values.put("task_id", tI.getId());
+                values.put("step_id", 0);
+                values.put("alarmInfo", assignmnentItem.getDescription());
+                values.put("alarmStepInfo", "");
+                Date alarmDate = new Date(cal.getTimeInMillis()+tI.getTimeInterval());
+                values.put("alarmTimeStamp", BasicUtils.convertDateToString(alarmDate));
+                values.put("isuccess",0);
+
+                db.insert(TABLE_5, null, values);
+            }
+        }
+    }
+
+    // ============ Actions ========================================================================
+
+    public void initializeAssignment(AssignmentItem assignmentItem){
+        for(TaskItem tI: assignmentItem.getTaskList()){
+            if(BasicUtils.validateList(tI.getStepList())){
+                for(StepItem sI: tI.getStepList()) {
+                    if (isStepTimePassed(sI))
+                        markStep(sI.getId(), true);
+                }
+            }
+            else {
+                if (isTaskTimePassed(tI)) {
+                    markTask(tI.getId(), true);
+                }
+            }
+        }
+    }
+
+    public boolean isTaskTimePassed(TaskItem taskItem){
+        SQLiteDatabase db = getReadable();
+        Date stepDate = Calendar.getInstance().getTime();
+        Date now = Calendar.getInstance().getTime();
+        String selectQuery = "SELECT * FROM " + TABLE_5 + " where task_id = '" + taskItem.getId()+"'";
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            stepDate = BasicUtils.convertStringToDate(
+                    c.getString(c.getColumnIndex("alarmTimeStamp")));
+        }
+
+        if(stepDate.before(now))
+            return false;
+        else
+            return true;
+
+    }
+
+    public boolean isStepTimePassed(StepItem stepItem){
+        SQLiteDatabase db = getReadable();
+        Date stepDate = Calendar.getInstance().getTime();
+        Date now = Calendar.getInstance().getTime();
+        String selectQuery = "SELECT * FROM " + TABLE_5 + " where step_id = '" + stepItem.getId()+"'";
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            stepDate = BasicUtils.convertStringToDate(
+                    c.getString(c.getColumnIndex("alarmTimeStamp")));
+        }
+
+        if(stepDate.before(now))
+            return false;
+        else
+            return true;
+    }
+
+    public void markTask(int taskId, boolean isDone){
+        SQLiteDatabase db = getWritable();
+        String where = " id = '"+taskId+"'";
+        ContentValues values = new ContentValues();
+        values.put("isPending", isDone ? 0 : 1);
+        long a = db.update(TABLE_3, values, where, null);
+    }
+
+    public void markStep(int stepId, boolean isDone){
+        SQLiteDatabase db = getWritable();
+        String where = " id = '"+stepId+"'";
+        ContentValues values = new ContentValues();
+        values.put("isPending", isDone ? 0 : 1);
+        long a = db.update(TABLE_4, values, where, null);
+    }
+
+    public void refreshAssignment(int assignmentId){
+        AssignmentItem assignmentItem = getAssignmentOnly(assignmentId);
+
+        if(assignmentItem.isReccursive()) {
+            SQLiteDatabase db = getWritable();
+            String where = " id = '" + assignmentId + "'";
+            ContentValues values = new ContentValues();
+            values.put("isPending", isDone ? 0 : 1);
+            long a = db.update(TABLE_2, values, where, null);
+        }
+
+
+    }
+
+    public void moniterStep(int stepId){
+        int taskId = getStep(stepId).getTask_id();
+        int isPending = 1;
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT SUM(isPending) FROM " + TABLE_4 + " where task_id = '" + taskId+"'";
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            isPending = c.getInt(0);
+        }
+
+        if(isPending == 0)
+            markTask(taskId, true);
+    }
+
+    public void moniterTask(int taskId){
+        int assignmentId = getTask(taskId).getAssignment_id();
+
+        int isPending = 1;
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT SUM(isPending) FROM " + TABLE_3 + " where assignment_id = '" + assignmentId+"'";
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            isPending = c.getInt(0);
+        }
+
+        if(isPending == 0)
+            markTask(taskId, true);
+    }
+
+    // ============ Get Methods ====================================================================
+
+
+    public AssignmentItem getAssignmentOnly(int assignmentId){
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT * FROM " + TABLE_2 + " where id = '" + assignmentId+"'";
+        Cursor c = db.rawQuery(selectQuery, null);
+        AssignmentItem item = new AssignmentItem();
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            item.setId(c.getInt(c.getColumnIndex("id")));
+            item.setType(c.getInt(c.getColumnIndex("type")));
+            item.setDescription(c.getString(c.getColumnIndex("description")));
+            item.setReccursive(c.getInt(c.getColumnIndex("isReccursive")) == 1);
+            item.setInterval(c.getLong(c.getColumnIndex("interval")));
+            item.setCreatedOn(c.getString(c.getColumnIndex("createdOn")));
+        }
+        return item;
+    }
+
+    public AssignmentItem getAssignment(int assignmentId){
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT * FROM " + TABLE_2 + " where id = '" + assignmentId+"'";
+        Cursor c = db.rawQuery(selectQuery, null);
+        AssignmentItem item = new AssignmentItem();
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            item.setId(c.getInt(c.getColumnIndex("id")));
+            item.setType(c.getInt(c.getColumnIndex("type")));
+            item.setDescription(c.getString(c.getColumnIndex("description")));
+            item.setReccursive(c.getInt(c.getColumnIndex("isReccursive")) == 1);
+            item.setInterval(c.getLong(c.getColumnIndex("interval")));
+            item.setCreatedOn(c.getString(c.getColumnIndex("createdOn")));
+
+            item.setTaskList(getTaskList(assignmentId));
+        }
+        return item;
+    }
+
+    public ArrayList<TaskItem> getTaskList(int assignmentId){
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT * FROM " + TABLE_3 + " where assignment_id = '" + assignmentId+"'";
+        ArrayList<TaskItem> list = new ArrayList<>();
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            for (int i = 0; i < c.getCount(); i++) {
+                TaskItem tI = new TaskItem();
+                tI.setAssignment_id(c.getInt(c.getColumnIndex("assignment_id")));
+                tI.setScheduleDateTime(c.getString(c.getColumnIndex("scheduleDateTime")));
+                tI.setPending(c.getInt(c.getColumnIndex("isPending")) == 1);
+                tI.setActive(c.getInt(c.getColumnIndex("isActive")) == 1);
+                tI.setTimeInterval(c.getLong(c.getColumnIndex("interval")));
+                tI.setStepList(getStepList(tI.getId()));
+                list.add(tI);
+                c.moveToNext();
+            }
+        }
+        return list;
+    }
+
+    public TaskItem getTask(int taskId){
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT * FROM " + TABLE_3 + " where id = '" + taskId+"'";
+        TaskItem item = new TaskItem();
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            item.setAssignment_id(c.getInt(c.getColumnIndex("assignment_id")));
+            item.setScheduleDateTime(c.getString(c.getColumnIndex("scheduleDateTime")));
+            item.setPending(c.getInt(c.getColumnIndex("isPending")) == 1);
+            item.setActive(c.getInt(c.getColumnIndex("isActive")) == 1);
+            item.setTimeInterval(c.getLong(c.getColumnIndex("interval")));
+            item.setStepList(getStepList(taskId));
+        }
+        return item;
+    }
+
+    public ArrayList<StepItem> getStepList(int taskId){
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT * FROM " + TABLE_4 + " where task_id = '" + taskId+"'";
+        ArrayList<StepItem> list = new ArrayList<>();
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            for (int i = 0; i < c.getCount(); i++) {
+                StepItem sI = new StepItem();
+                sI.setId(c.getInt(c.getColumnIndex("task_id")));
+                sI.setInfo(c.getString(c.getColumnIndex("info")));
+                sI.setInterval(c.getLong(c.getColumnIndex("interval")));
+                sI.setActionToTake(c.getInt(c.getColumnIndex("actionToTake")));
+                sI.setPending(c.getInt(c.getColumnIndex("isPending"))==1);
+                list.add(sI);
+                c.moveToNext();
+            }
+        }
+        return list;
+
+    }
+
+    public StepItem getStep(int stepId){
+        SQLiteDatabase db = getReadable();
+        String selectQuery = "SELECT * FROM " + TABLE_4 + " where id = '" + stepId+"'";
+        StepItem item = new StepItem();
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        if (!c.isClosed()) {
+            item.setId(c.getInt(c.getColumnIndex("task_id")));
+            item.setInfo(c.getString(c.getColumnIndex("info")));
+            item.setInterval(c.getLong(c.getColumnIndex("interval")));
+            item.setActionToTake(c.getInt(c.getColumnIndex("actionToTake")));
+            item.setPending(c.getInt(c.getColumnIndex("isPending"))==1);
+        }
+        return item;
+
+    }
 
 }

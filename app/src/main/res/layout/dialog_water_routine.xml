@@ -20,14 +20,7 @@
             android:orientation="vertical"
             android:layout_weight="1">
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/ic_water_bg"
-            android:layout_marginTop="20dp"/>
-
-        <TextView
+            <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Water Routine"

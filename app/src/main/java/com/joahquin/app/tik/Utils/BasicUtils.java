@@ -10,7 +10,10 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -56,6 +59,97 @@ public class BasicUtils {
     public int getDpsInPixels(float dps) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dps, context.getResources().getDisplayMetrics());
     }
+
+    public static Date convertStringToDate(String dateString, String dateFormat){
+        Date formattedDate;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+            formattedDate = sdf.parse(dateString);
+        } catch (ParseException e) {
+            formattedDate = Calendar.getInstance().getTime();
+            e.printStackTrace();
+        }
+
+
+        return formattedDate;
+
+    }
+
+    public static Date convertStringToDate(String dateString){
+        SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT);
+        Date formattedDate;
+        try {
+            formattedDate = sdf.parse(dateString);
+        } catch (ParseException e) {
+            formattedDate = Calendar.getInstance().getTime();
+            e.printStackTrace();
+        }
+
+
+        return formattedDate;
+
+    }
+
+    public static String convertDateToString(Date date, String dateFormat){
+        String formattedDate;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+            formattedDate = sdf.format(date);
+        } catch (Exception e) {
+            SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT);
+            formattedDate = sdf.format(Calendar.getInstance().getTime());
+            e.printStackTrace();
+        }
+        return formattedDate;
+    }
+
+    public static String convertDateToString(Date date){
+        String formattedDate;
+        SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT);
+        try {
+            formattedDate = sdf.format(date);
+        } catch (Exception e) {
+            formattedDate = sdf.format(Calendar.getInstance().getTime());
+            e.printStackTrace();
+        }
+        return formattedDate;
+    }
+
+    public static Calendar convertStringToCal(String dateString, String dateFormat){
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(convertStringToDate(dateString,dateFormat));
+        return cal;
+    }
+
+    public static Calendar convertStringToCal(String dateString){
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(convertStringToDate(dateString));
+        return cal;
+    }
+
+    public static String convertCalToString(Calendar dateCal, String dateFormat){
+        String formattedDate = "";
+        formattedDate = convertDateToString(dateCal.getTime(), dateFormat);
+        return formattedDate;
+    }
+
+    public static String convertCalToString(Calendar dateCal){
+        String formattedDate = "";
+        formattedDate = convertDateToString(dateCal.getTime());
+        return formattedDate;
+    }
+
+    public static <T> boolean validateList(ArrayList<T> list){
+        if(list == null)
+            return false;
+        if(list.size() == 0)
+            return false;
+        else
+            return true;
+    }
+
 
 
 }

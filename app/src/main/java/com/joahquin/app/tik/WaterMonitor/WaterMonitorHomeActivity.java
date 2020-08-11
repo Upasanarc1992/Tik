@@ -36,11 +36,14 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.joahquin.app.tik.Common.ChipViewAdapter;
 import com.joahquin.app.tik.Common.NotifyInterface;
+import com.joahquin.app.tik.Items.AssignmentItem;
+import com.joahquin.app.tik.Items.TaskItem;
 import com.joahquin.app.tik.R;
 import com.joahquin.app.tik.Utils.BasicUtils;
 import com.joahquin.app.tik.Utils.CustomViews.DateTimeEditText;
 import com.joahquin.app.tik.Utils.CustomViews.LabelView;
 import com.joahquin.app.tik.Utils.DatabaseHandler;
+import com.joahquin.app.tik.Utils.Templates;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -171,6 +174,13 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
                 WindowManager.LayoutParams.MATCH_PARENT);
 
         RecyclerView rvPreview = previewDialog.findViewById(R.id.rvPreview);
+        Button bDone = previewDialog.findViewById(R.id.bDone);
+        bDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveReminder();
+            }
+        });
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         rvPreview.setLayoutManager(layoutManager);
@@ -186,6 +196,35 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
 
 
         previewDialog.show();
+    }
+
+    private void saveReminder() {
+        ArrayList<TaskItem> taskList = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        Calendar calInterval = Calendar.getInstance();
+        int todayDate = cal.get(Calendar.DATE);
+        for(Date dt : timeIntervalList){
+            TaskItem item = new TaskItem();
+            calInterval.setTimeInMillis(dt.getTime());
+            calInterval.set(Calendar.DATE, todayDate);
+
+            long timeInterval = calInterval.getTimeInMillis() - cal.getTimeInMillis();
+            item.setTimeInterval(timeInterval);
+            taskList.add(item);
+        }
+        Log.d(TAG, "saveReminder: "+ taskList.toString());
+
+        AssignmentItem assignmentItem = new AssignmentItem();
+        assignmentItem.setType(Templates.WATER_MONITOR.ASSIGNMENT_ID);
+        assignmentItem.setDescription(Templates.WATER_MONITOR.ASSIGNMENT_DESC);
+        assignmentItem.setReccursive(Templates.WATER_MONITOR.ASSIGNMENT_RECCURSIVE);
+        assignmentItem.setInterval(Templates.WATER_MONITOR.ASSIGNMENT_INTERVAL);
+        assignmentItem.setTaskList(taskList);
+
+        db.replaceAssignment(assignmentItem);
     }
 
 
