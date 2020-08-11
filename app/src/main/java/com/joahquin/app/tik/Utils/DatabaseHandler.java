@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.joahquin.app.tik.Items.AssignmentItem;
 import com.joahquin.app.tik.Items.StepItem;
@@ -112,10 +111,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_TASKS = "CREATE TABLE " + TABLE_3 +
             "(" + "id" + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             "assignment_id" + " INTEGER," +
-            "scheduleDateTime" + " TEXT," +
             "interval" + " TEXT," + // Time gap from lastPass date
-            "isPending" + " INTEGER," +
-            "isActive" + " INTEGER" +
+            "isPending" + " INTEGER" +
             ")";
 
     // Steps table create statement
@@ -136,6 +133,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "alarmInfo" + " TEXT," +
             "alarmStepInfo" + " TEXT," +
             "alarmTimeStamp" + " TEXT," +
+            "alarmTimeMills" + " INTEGER," +
             "isuccess" + " INTEGER" +
             ")";
 
@@ -152,12 +150,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put("interval", assignment.getInterval());
         values.put("createdOn"," DATETIME('NOW')");
 
-        db.insert(TABLE_2, null, values);
+        int id = (int)db.insert(TABLE_2, null, values);
+        assignment.setId(id);
 
         replaceTask(assignment.getId(), assignment.getTaskList());
+        addScheuledTasks(assignment);
+        initializeAssignment(assignment);
     }
 
-    public void updateAssignment(AssignmentItem assignment){
+    public void updateAssignment(int assignmentId){
+        AssignmentItem assignment = getAssignment(assignmentId);
+        Date lastPassDate = BasicUtils.convertStringToDate(assignment.getLastPass());
+        Date updatedLastPassDate = new Date(lastPassDate.getTime() + assignment.getInterval());
+        assignment.setLastPass(BasicUtils.convertDateToString(updatedLastPassDate));
+
         SQLiteDatabase db = getWritable();
         String where = " id = '"+assignment.getId()+"'";
 
@@ -165,68 +171,63 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put("lastPass", assignment.getLastPass());
         db.update(TABLE_2, values, where, null);
 
-        initializeAssignment(assignment.getId());
+        reInitializeAssignment(assignment.getId());
     }
 
-    public void initializeAssignment(int assignmentId){
+    public void reInitializeAssignment(int assignmentId){
         SQLiteDatabase db = getWritable();
         ArrayList<TaskItem> taskList = getTaskList(assignmentId);
 
         for(TaskItem tI : taskList){
-            markTask(tI.getId(), false);
+            markTask(tI.getId(), false, false);
             if(BasicUtils.validateList(tI.getStepList()))
             {
                 for(StepItem sI : tI.getStepList())
-                    markStep(sI.getId(), false);
+                    markStep(sI.getId(), false, false);
             }
-
         }
     }
 
-
-
     public void replaceTask(int assignmentId, ArrayList<TaskItem> taskList){
-        SQLiteDatabase db = getReadable();
+        SQLiteDatabase db = getWritable();
         db.delete(TABLE_3, "assignment_id" + "=" + assignmentId, null);
 
         for(TaskItem tI: taskList) {
             ContentValues values = new ContentValues();
             values.put("assignment_id", assignmentId);
-            values.put("scheduleDateTime", tI.getScheduleDateTime());
-            values.put("isPending", 0);
-            values.put("isActive", tI.isActive() ? 1 : 0);
+            values.put("isPending", 1);
             values.put("interval", String.valueOf(tI.getTimeInterval()));
 
-            db.insert(TABLE_3, null, values);
+            int id = (int)db.insert(TABLE_3, null, values);
+            tI.setId(id);
             replaceSteps(tI.getId(), tI.getStepList());
         }
     }
 
     public void replaceSteps(int taskId, ArrayList<StepItem> stepsList){
-        SQLiteDatabase db = getReadable();
-        if(stepsList != null && stepsList.size()>0) {
+        SQLiteDatabase db = getWritable();
+        if(BasicUtils.validateList(stepsList)) {
             db.delete(TABLE_4, "task_id" + "=" + taskId, null);
-
             for (StepItem sI : stepsList) {
                 ContentValues values = new ContentValues();
                 values.put("task_id", taskId);
                 values.put("info", sI.getInfo());
                 values.put("interval", sI.getInterval());
                 values.put("actionToTake", sI.getActionToTake());
-                values.put("isPending", 0);
+                values.put("isPending", 1);
 
                 db.insert(TABLE_4, null, values);
             }
         }
     }
 
-
     public void addScheuledTasks(AssignmentItem assignmnentItem){
-        SQLiteDatabase db = getReadable();
+        SQLiteDatabase db = getWritable();
 
         Calendar cal = BasicUtils.convertStringToCal(assignmnentItem.getLastPass());
 
         for(TaskItem tI : assignmnentItem.getTaskList()){
+            db.delete(TABLE_5, "task_id" + "=" + tI.getId(), null);
             if(BasicUtils.validateList(tI.getStepList())) {
                 for (StepItem sI : tI.getStepList()) {
                     ContentValues values = new ContentValues();
@@ -237,6 +238,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
                     Date alarmDate = new Date(cal.getTimeInMillis()+tI.getTimeInterval()+sI.getInterval());
                     values.put("alarmTimeStamp", BasicUtils.convertDateToString(alarmDate));
+                    values.put("alarmTimeMills", alarmDate.getTime());
                     values.put("isuccess",0);
 
                     db.insert(TABLE_5, null, values);
@@ -250,6 +252,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 values.put("alarmStepInfo", "");
                 Date alarmDate = new Date(cal.getTimeInMillis()+tI.getTimeInterval());
                 values.put("alarmTimeStamp", BasicUtils.convertDateToString(alarmDate));
+                values.put("alarmTimeMills", alarmDate.getTime());
                 values.put("isuccess",0);
 
                 db.insert(TABLE_5, null, values);
@@ -264,12 +267,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             if(BasicUtils.validateList(tI.getStepList())){
                 for(StepItem sI: tI.getStepList()) {
                     if (isStepTimePassed(sI))
-                        markStep(sI.getId(), true);
+                        markStep(sI.getId(), true, true);
                 }
             }
             else {
                 if (isTaskTimePassed(tI)) {
-                    markTask(tI.getId(), true);
+                    markTask(tI.getId(), true, true);
                 }
             }
         }
@@ -312,38 +315,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return true;
     }
 
-    public void markTask(int taskId, boolean isDone){
+    public void markTask(int taskId, boolean isDone, boolean moniter){
         SQLiteDatabase db = getWritable();
         String where = " id = '"+taskId+"'";
         ContentValues values = new ContentValues();
         values.put("isPending", isDone ? 0 : 1);
         long a = db.update(TABLE_3, values, where, null);
+
+        if(moniter && isDone)
+            moniterTask(taskId);
     }
 
-    public void markStep(int stepId, boolean isDone){
+    public void markStep(int stepId, boolean isDone, boolean moniter){
         SQLiteDatabase db = getWritable();
         String where = " id = '"+stepId+"'";
         ContentValues values = new ContentValues();
         values.put("isPending", isDone ? 0 : 1);
         long a = db.update(TABLE_4, values, where, null);
-    }
 
-    public void refreshAssignment(int assignmentId){
-        AssignmentItem assignmentItem = getAssignmentOnly(assignmentId);
-
-        if(assignmentItem.isReccursive()) {
-            SQLiteDatabase db = getWritable();
-            String where = " id = '" + assignmentId + "'";
-            ContentValues values = new ContentValues();
-            values.put("isPending", isDone ? 0 : 1);
-            long a = db.update(TABLE_2, values, where, null);
-        }
-
-
+        if(moniter && isDone)
+            moniterStep(stepId);
     }
 
     public void moniterStep(int stepId){
-        int taskId = getStep(stepId).getTask_id();
+        int taskId = getStep(stepId).getTaskId();
         int isPending = 1;
         SQLiteDatabase db = getReadable();
         String selectQuery = "SELECT SUM(isPending) FROM " + TABLE_4 + " where task_id = '" + taskId+"'";
@@ -354,7 +349,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         if(isPending == 0)
-            markTask(taskId, true);
+            markTask(taskId, true, true);
     }
 
     public void moniterTask(int taskId){
@@ -370,7 +365,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         if(isPending == 0)
-            markTask(taskId, true);
+            updateAssignment(assignmentId);
     }
 
     // ============ Get Methods ====================================================================
@@ -422,9 +417,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             for (int i = 0; i < c.getCount(); i++) {
                 TaskItem tI = new TaskItem();
                 tI.setAssignment_id(c.getInt(c.getColumnIndex("assignment_id")));
-                tI.setScheduleDateTime(c.getString(c.getColumnIndex("scheduleDateTime")));
                 tI.setPending(c.getInt(c.getColumnIndex("isPending")) == 1);
-                tI.setActive(c.getInt(c.getColumnIndex("isActive")) == 1);
                 tI.setTimeInterval(c.getLong(c.getColumnIndex("interval")));
                 tI.setStepList(getStepList(tI.getId()));
                 list.add(tI);
@@ -442,9 +435,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         c.moveToFirst();
         if (!c.isClosed()) {
             item.setAssignment_id(c.getInt(c.getColumnIndex("assignment_id")));
-            item.setScheduleDateTime(c.getString(c.getColumnIndex("scheduleDateTime")));
             item.setPending(c.getInt(c.getColumnIndex("isPending")) == 1);
-            item.setActive(c.getInt(c.getColumnIndex("isActive")) == 1);
             item.setTimeInterval(c.getLong(c.getColumnIndex("interval")));
             item.setStepList(getStepList(taskId));
         }

@@ -215,13 +215,13 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
             item.setTimeInterval(timeInterval);
             taskList.add(item);
         }
-        Log.d(TAG, "saveReminder: "+ taskList.toString());
 
         AssignmentItem assignmentItem = new AssignmentItem();
         assignmentItem.setType(Templates.WATER_MONITOR.ASSIGNMENT_ID);
         assignmentItem.setDescription(Templates.WATER_MONITOR.ASSIGNMENT_DESC);
         assignmentItem.setReccursive(Templates.WATER_MONITOR.ASSIGNMENT_RECCURSIVE);
         assignmentItem.setInterval(Templates.WATER_MONITOR.ASSIGNMENT_INTERVAL);
+        assignmentItem.setLastPass(basicUtils.convertCalToString(cal));
         assignmentItem.setTaskList(taskList);
 
         db.replaceAssignment(assignmentItem);

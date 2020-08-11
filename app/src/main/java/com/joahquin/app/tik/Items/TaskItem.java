@@ -6,10 +6,8 @@ public class TaskItem {
 
     int id;
     int assignment_id;
-    String scheduleDateTime;
     long timeInterval;
     boolean isPending;
-    boolean isActive;
     ArrayList<StepItem> stepList;
 
     public int getId() {
@@ -28,28 +26,12 @@ public class TaskItem {
         this.assignment_id = assignment_id;
     }
 
-    public String getScheduleDateTime() {
-        return scheduleDateTime;
-    }
-
-    public void setScheduleDateTime(String scheduleDateTime) {
-        this.scheduleDateTime = scheduleDateTime;
-    }
-
     public boolean isPending() {
         return isPending;
     }
 
     public void setPending(boolean pending) {
         isPending = pending;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
     }
 
     public ArrayList<StepItem> getStepList() {
@@ -73,10 +55,8 @@ public class TaskItem {
         return "TaskItem{" +
                 "id=" + id +
                 ", assignment_id=" + assignment_id +
-                ", scheduleDateTime='" + scheduleDateTime + '\'' +
                 ", timeInterval=" + timeInterval +
                 ", isPending=" + isPending +
-                ", isActive=" + isActive +
                 ", stepList=" + stepList +
                 '}';
     }

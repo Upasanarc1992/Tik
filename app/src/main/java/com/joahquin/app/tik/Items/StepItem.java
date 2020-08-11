@@ -2,7 +2,7 @@ package com.joahquin.app.tik.Items;
 
 public class StepItem {
     int id;
-    int task_id;
+    int taskId;
     String info;
     long interval;
     int actionToTake;
@@ -16,12 +16,12 @@ public class StepItem {
         this.id = id;
     }
 
-    public int getTask_id() {
-        return task_id;
+    public int getTaskId() {
+        return taskId;
     }
 
-    public void setTask_id(int task_id) {
-        this.task_id = task_id;
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
     }
 
     public String getInfo() {
@@ -60,7 +60,7 @@ public class StepItem {
     public String toString() {
         return "StepItem{" +
                 "id=" + id +
-                ", task_id=" + task_id +
+                ", task_id=" + taskId +
                 ", info='" + info + '\'' +
                 ", interval=" + interval +
                 ", actionToTake=" + actionToTake +
