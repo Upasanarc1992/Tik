@@ -397,8 +397,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         else
             markTask(scheduleItem.getTaskId(), isDone, true);
 
-        if(isUpdated)
-            updateJob();
+        if(isUpdated) {
+            ScheduleItem nextSchedule = getNextSchedule();
+
+        }
     }
 
     public void updateJob() {

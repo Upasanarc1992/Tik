@@ -30,6 +30,9 @@ public class ShowNotificationJob extends Job {
     static final String TAG = "ShowNotificationJob";
     static ScheduleItem scheduleItem;
     static DatabaseHandler db;
+    static Context context;
+
+    static Intent serviceIntent;
 
     private static NotificationManagerCompat notificationManager;
 
@@ -37,27 +40,27 @@ public class ShowNotificationJob extends Job {
     @Override
     protected Result onRunJob(Params params) {
 
-//        String description = "";
-//        String header = "";
-//        String notifChaannel = "";
-//        int notifId = 1;
-//
-//        if(scheduleItem.getAssignmentType() == Templates.WATER_MONITOR.ASSIGNMENT_ID) {
-//            notifChaannel = Templates.WATER_MONITOR.NOTIF_CHANNEL;
-//            header = Templates.WATER_MONITOR.NOTIF_NAME;
-//            description = Templates.WATER_MONITOR.ASSIGNMENT_DESC;
-//            notifId = Templates.WATER_MONITOR.ASSIGNMENT_ID;
-//        }
-//
-//        Notification notification = new NotificationCompat.Builder(getContext(), notifChaannel)
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setContentTitle(header)
-//                .setContentText(description)
-//                .setPriority(NotificationManager.IMPORTANCE_HIGH)
-//                .setCategory(NotificationCompat.CATEGORY_ALARM)
-//                .build();
-//
-//        notificationManager.notify(notifId, notification);
+        String description = "";
+        String header = "";
+        String notifChaannel = "";
+        int notifId = 1;
+
+        if(scheduleItem.getAssignmentType() == Templates.WATER_MONITOR.ASSIGNMENT_ID) {
+            notifChaannel = Templates.WATER_MONITOR.NOTIF_CHANNEL;
+            header = Templates.WATER_MONITOR.NOTIF_NAME;
+            description = Templates.WATER_MONITOR.ASSIGNMENT_DESC;
+            notifId = Templates.WATER_MONITOR.ASSIGNMENT_ID;
+        }
+
+        Notification notification = new NotificationCompat.Builder(getContext(), notifChaannel)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(header)
+                .setContentText(description)
+                .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .build();
+
+        notificationManager.notify(notifId, notification);
 
         Log.e(TAG, "onRunJob: HERE RUN JOB");
         db.markSchedule(scheduleItem.getId(), true, true);
@@ -65,11 +68,25 @@ public class ShowNotificationJob extends Job {
         return Result.SUCCESS;
     }
 
-    public static void schedulePeriodic(Context context) {
+    public static void schedulePeriodic(ScheduleItem scheduleItemm) {
 
-        notificationManager = NotificationManagerCompat.from(context);
+        scheduleItem = scheduleItemm;
+        Calendar cal = Calendar.getInstance();
+        long timeToNextAlarm = scheduleItem.getTimeStamp() - cal.getTimeInMillis();
 
-        db = new DatabaseHandler(context);
+        new JobRequest.Builder(ShowNotificationJob.TAG)
+                .setExact(timeToNextAlarm)
+                .setUpdateCurrent(true)
+                .build()
+                .schedule();
+    }
+
+    public static void schedulePeriodic(Context c) {
+        context = c;
+        serviceIntent = new Intent(c, MyService.class);
+        notificationManager = NotificationManagerCompat.from(c);
+
+        db = new DatabaseHandler(c);
         scheduleItem = db.getNextSchedule();
         Calendar cal = Calendar.getInstance();
         long timeToNextAlarm = scheduleItem.getTimeStamp() - cal.getTimeInMillis();
