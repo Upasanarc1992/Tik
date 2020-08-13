@@ -43,6 +43,7 @@ import com.joahquin.app.tik.Utils.BasicUtils;
 import com.joahquin.app.tik.Utils.CustomViews.DateTimeEditText;
 import com.joahquin.app.tik.Utils.CustomViews.LabelView;
 import com.joahquin.app.tik.Utils.DatabaseHandler;
+import com.joahquin.app.tik.Utils.Services.ShowNotificationJob;
 import com.joahquin.app.tik.Utils.Templates;
 
 import java.util.ArrayList;
@@ -225,12 +226,14 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
         assignmentItem.setTaskList(taskList);
 
         db.replaceAssignment(assignmentItem);
+        ShowNotificationJob.schedulePeriodic(context);
     }
 
 
     public ArrayList<KeyValueItem> getIntervals(){
         ArrayList<KeyValueItem> intervals = new ArrayList<>();
 
+        intervals.add(new KeyValueItem("2 min",0.05));
         intervals.add(new KeyValueItem("30 min",0.5));
         intervals.add(new KeyValueItem("every hour",1));
         intervals.add(new KeyValueItem("2 hours",2));
@@ -255,8 +258,6 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
             tmpTime = cal.getTime();
             dateList.add(tmpTime);
         }
-
-        Log.d(TAG, "getDateWithIntervals: "+ dateList.toString());
         return dateList;
     }
 

@@ -2,5 +2,5 @@ package com.joahquin.app.tik.Utils;
 
 public class Constants {
 
-    public static final String DATE_FORMAT = "YYYY-MM-DDThh:mm:ssZ";
+    public static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 }

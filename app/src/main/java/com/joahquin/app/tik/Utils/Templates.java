@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 public class Templates {
 
     public static class WATER_MONITOR{
+        public static String NOTIF_CHANNEL = "Water Monitor Chanel";
+        public static String NOTIF_NAME = "Water Monitor";
 
         public static int ASSIGNMENT_ID = 1;
         public static String ASSIGNMENT_DESC = "Remind me of taking water";

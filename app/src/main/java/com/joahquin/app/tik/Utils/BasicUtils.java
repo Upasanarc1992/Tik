@@ -2,6 +2,7 @@ package com.joahquin.app.tik.Utils;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
@@ -84,8 +85,6 @@ public class BasicUtils {
             formattedDate = Calendar.getInstance().getTime();
             e.printStackTrace();
         }
-
-
         return formattedDate;
 
     }
@@ -149,6 +148,7 @@ public class BasicUtils {
         else
             return true;
     }
+
 
 
 
