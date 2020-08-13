@@ -233,7 +233,7 @@ public class WaterMonitorHomeActivity extends AppCompatActivity{
     public ArrayList<KeyValueItem> getIntervals(){
         ArrayList<KeyValueItem> intervals = new ArrayList<>();
 
-        intervals.add(new KeyValueItem("2 min",0.05));
+        intervals.add(new KeyValueItem("3 min",0.05));
         intervals.add(new KeyValueItem("30 min",0.5));
         intervals.add(new KeyValueItem("every hour",1));
         intervals.add(new KeyValueItem("2 hours",2));

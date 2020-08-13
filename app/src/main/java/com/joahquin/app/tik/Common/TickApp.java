@@ -11,6 +11,8 @@ import com.joahquin.app.tik.Utils.Templates;
 
 public class TickApp extends Application {
 
+    public static final String SERVICE_NOTIF_CHANNEL = "service_notif";
+    public static final int SERVICE_NOTIF_ID = 999;
 
     @Override
     public void onCreate() {
@@ -23,6 +25,14 @@ public class TickApp extends Application {
     private void createNotificationChannels() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
+
+            NotificationChannel notifChanel = new NotificationChannel(
+                    SERVICE_NOTIF_CHANNEL,
+                    SERVICE_NOTIF_CHANNEL,
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            notifChanel.setDescription(Templates.WATER_MONITOR.ASSIGNMENT_DESC);
+
             NotificationChannel notifChanel1 = new NotificationChannel(
                     Templates.WATER_MONITOR.NOTIF_CHANNEL,
                     Templates.WATER_MONITOR.NOTIF_NAME,
@@ -31,6 +41,7 @@ public class TickApp extends Application {
             notifChanel1.setDescription(Templates.WATER_MONITOR.ASSIGNMENT_DESC);
 
             NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(notifChanel);
             manager.createNotificationChannel(notifChanel1);
         }
     }

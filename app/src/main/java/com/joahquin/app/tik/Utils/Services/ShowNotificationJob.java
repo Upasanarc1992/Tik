@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,8 +23,6 @@ import com.joahquin.app.tik.Utils.DatabaseHandler;
 import com.joahquin.app.tik.Utils.Templates;
 
 import java.util.Calendar;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class ShowNotificationJob extends Job {
 
@@ -73,12 +72,7 @@ public class ShowNotificationJob extends Job {
         scheduleItem = scheduleItemm;
         Calendar cal = Calendar.getInstance();
         long timeToNextAlarm = scheduleItem.getTimeStamp() - cal.getTimeInMillis();
-
-        new JobRequest.Builder(ShowNotificationJob.TAG)
-                .setExact(timeToNextAlarm)
-                .setUpdateCurrent(true)
-                .build()
-                .schedule();
+        MyService.createJob(timeToNextAlarm);
     }
 
     public static void schedulePeriodic(Context c) {
@@ -91,10 +85,16 @@ public class ShowNotificationJob extends Job {
         Calendar cal = Calendar.getInstance();
         long timeToNextAlarm = scheduleItem.getTimeStamp() - cal.getTimeInMillis();
 
-        new JobRequest.Builder(ShowNotificationJob.TAG)
-                .setExact(timeToNextAlarm)
-                .setUpdateCurrent(true)
-                .build()
-                .schedule();
+
+        Intent serviceIntent = new Intent(context, MyService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent);
+        }
+        else{
+            context.startService(serviceIntent);
+        }
+
+        MyService.createJob(timeToNextAlarm);
+
     }
 }

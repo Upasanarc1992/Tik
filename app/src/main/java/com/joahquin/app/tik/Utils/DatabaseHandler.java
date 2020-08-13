@@ -1,12 +1,15 @@
 package com.joahquin.app.tik.Utils;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.util.Log;
 
 import com.evernote.android.job.JobRequest;
@@ -14,6 +17,7 @@ import com.joahquin.app.tik.Items.AssignmentItem;
 import com.joahquin.app.tik.Items.ScheduleItem;
 import com.joahquin.app.tik.Items.StepItem;
 import com.joahquin.app.tik.Items.TaskItem;
+import com.joahquin.app.tik.Utils.Services.MyService;
 import com.joahquin.app.tik.Utils.Services.ShowNotificationJob;
 
 import java.util.ArrayList;
@@ -399,7 +403,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if(isUpdated) {
             ScheduleItem nextSchedule = getNextSchedule();
-
+            if(nextSchedule!= null)
+            ShowNotificationJob.schedulePeriodic(nextSchedule);
+            else
+            {
+                Intent intent = new Intent(context, MyService.class);
+                intent.setAction(MyService.ACTION_STOP_FOREGROUND_SERVICE);
+                context.startService(intent);
+            }
         }
     }
 
